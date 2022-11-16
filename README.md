@@ -19,4 +19,6 @@ C-CATのユーザーは基本的に日本人と思われますので、説明は
 [左側切断によるバイアスの現状とRisk-set adjustmentの限界を述べた論文](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9190030/)  
 [誤った補正手法が用いられている論文](https://aacrjournals.org/cancerdiscovery/article/10/4/526/2419/Characteristics-and-Outcome-of-AKT1E17K-Mutant)    
 
-左側切断による選択バイアスを評価
+左側切断による選択バイアスを評価する指標として、conditional Kendall tau統計量があります。これは、生存期間解析の評価開始日と観察開始日が異なる場合に、評価開始日から観察開始日までの期間と、評価開始日から最終観察日までの期間の相関係数を意味します。    
+
+
