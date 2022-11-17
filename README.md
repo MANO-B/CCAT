@@ -20,13 +20,20 @@ C-CATのユーザーは基本的に日本人と思われますので、説明は
 [左側切断によるバイアスの現状とRisk-set adjustmentの限界を述べた論文](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9190030/)  
 [不適切な補正手法が用いられている論文](https://aacrjournals.org/cancerdiscovery/article/10/4/526/2419/Characteristics-and-Outcome-of-AKT1E17K-Mutant)    
 
-左側切断による選択バイアスを評価する指標として、conditional Kendall tau統計量があります。これは、生存期間解析の評価開始日と観察開始日が異なる場合に、評価開始日から観察開始日までの期間と、評価開始日から最終観察日までの期間の相関係数を意味します。なお、cKendall tauがゼロの場合のみrisk-set adjustmentによるバイアス補正が妥当であることが示されています。    
+左側切断による選択バイアスを評価する指標として、conditional Kendall tau統計量があります。これは、生存期間解析の評価開始日と観察開始日が異なる場合に、評価開始日から観察開始日までの期間と、評価開始日から最終観察日までの期間の相関係数を意味します。なお、cKendall tauがゼロの場合のみrisk-set adjustmentによるバイアス補正が妥当であることが示されています。  
+[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)    
 ![Figure_3, explanation for cKendall tau](github_3.png)    
 
 C-CATのデータの場合、どのイベントを生存期間解析の評価開始日にすべきかは悩ましくあります。診断時のステージが不明であるため、「stage IVの患者が診断されてからの生存期間解析」という一般によく見られる解析は不可能です。使用された化学療法と使用開始日は分かるため、化学療法開始後の生存期間解析は可能ですので、各種組織型について進行期となってから最初に行われた化学療法からの生存期間解析を行うことにしました。この場合、cKendall tauが正の値であると「化学療法開始後早期にCGPを受けた患者は全生存期間が短い」、負の値であると「化学療法開始後早期にCGPを受けた患者は全生存期間が長い」ということになります。      
 
 本研究の結果、日本においては基本的に全てのがん種でcKendall tauは正の値でした。なおアメリカのDana-Faberからの診断日を評価開始日とした報告では、診断時stage 1-3の患者ではcKendall tauが負、診断時stage 4の患者ではcKendall tauが概ねゼロとなっていました。日本とアメリカの大きな差異として、アメリカでは進行期や治療内容に関わらずどのタイミングでもCGPを受けることができる点が挙げられます。これの結果から推定される事柄として、進行期になる前に早めに検査を受けることが予後改善に繋がる、健康意識が高くCGP検査を早期に受けるような患者はそもそも予後が良い、あまりに進行した状態でCGPを受けても予後改善には繋がらない、といったことが考えられると思います。    
 
-この左側切断による選択バイアスについては統計学者の間でも補正手法の開発が行われており、とくに日本からは[江村剛志](https://sites.google.com/view/takeshi-emura)
+この左側切断による選択バイアスについては統計学者の間でも補正手法の開発が行われており、とくに日本からは[江村剛志](https://sites.google.com/view/takeshi-emura)先生が第一人者として知られています。左側切断による選択バイアスの補正手法はいくつかのR言語用のパッケージとして公開されています。  
+[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
+[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
+[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
+
+
+
 
 
