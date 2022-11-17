@@ -33,7 +33,8 @@ C-CATのデータの場合、どのイベントを生存期間解析の評価開
 [tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
 [depend.truncation: copula-graphic estimatorでの補正手法](https://cran.r-project.org/web/packages/depend.truncation/index.html)    
 
-
+しかし、tranSurvパッケージを使用して補正を試みたところ、大腸癌の初回化学療法後の生存曲線が右上に凸となり、臨床的に妥当性を欠く結果となってしまいました。  
+![Figure_4, bias adjustment with tranSurv package](github_4.png)  
 
 
 
