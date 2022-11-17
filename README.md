@@ -39,7 +39,150 @@ C-CATのデータの場合、どのイベントを生存期間解析の評価開
 現状のデータでは正確な全生存期間を推定できないことが分かったため、生存期間を二つに分割して考えることにしました。化学療法の開始からCGPまでの期間と、CGPから最終観察日までの期間については各患者から情報を得られます。そして、これらは左側切断がない生存情報であるため、通常のKaplan-Meier estimatorでの生存期間解析が可能です。全患者が必ずCGPを受けていますので、化学療法からCGPまでの期間は全く打ち切りがありません。CGPまでの期間で作成した生存曲線は概ね指数関数の様な形状でしたが、極めて初期の段階では傾きが小さく、あまりCGP検査を受ける症例が多くない傾向が見られました。この現象は様々な解釈が可能です。治療開始早期は化学療法の奏功率が高いが徐々に無効例が増加していくということなのかもしれません。本研究ではこの現象が「非常に進行の早い患者は化学療法実施中にも病状が進行するため、CGPを受ける機会を得ないまま死亡する」ということが原因とみなして解析を進めました。また、CGPまでの期間が中央値より短い半数の症例と長い半数の症例に分けて、CGP後の生存期間を通常のKaplan-Meier estimatorで推定すると、早期にCGPを受けた患者は予後が悪いことがわかりました。このことはcKendall tauが正であることと合致しています。    
 ![Figure_5, total survival devided into two periods](github_5.png)    
 
-化学療法開始からCGP検査までの生存曲線に左側切断による選択バイアスが潜んでいると考えましたので、下図の通り一部の患者を除外して真の生存曲線を推定することにしました。    
+化学療法開始からCGP検査までの生存曲線に左側切断による選択バイアスが潜んでいると考えましたので、下図の通り一部の患者を除外して真の生存曲線を推定することにしました。      
 ![Figure_6, adjusted survival from chemotherapy to CGP](github_6.png)    
+
+その上で、二つの生存曲線をWeibull分布で近似し、この生存曲線から得られる生存期間を足し合わせることで全生存期間を推定できるのではないかと考えました。これにより、各がん種での生存期間を実際の臨床に近い値で推定することができました。  
+![Figure_7, survival adjusted with Bayes inference](github_7.png)    
+
+Stan言語を用いたBayes推定によってシミュレーションを行っています。この領域ではKazuki Yoshida先生がわかりやすい解説記事を作成して下さっております。ここで紹介されているStanのコードを改変し、上述の解析を可能にしました。  
+[Bayesian Survival Analysis 1: Weibull Model with Stan](https://rstudio-pubs-static.s3.amazonaws.com/435225_07b4ab5afa824342a4680c9fb2de6098.html)    
+
+```R
+functions {
+  vector sqrt_vec(vector x) {
+    vector[dims(x)[1]] res;
+
+    for (m in 1:dims(x)[1]){
+      res[m] = sqrt(x[m]);
+    }
+
+    return res;
+  }
+
+  vector bg_prior_lp(real r_global, vector r_local) {
+    r_global ~ normal(0.0, 10.0);
+    r_local ~ inv_chi_square(1.0);
+
+    return r_global * sqrt_vec(r_local);
+  }
+}
+
+data {
+  int<lower=0> Median;
+  int<lower=0> Nobs;
+  int<lower=0> Ncen;
+  int<lower=0> Ntot;
+  int<lower=0> Nexp;
+  int<lower=0> M_bg;
+  vector[Ntot] ybef;
+  vector[Nexp] ybef_exp;
+  vector[Nobs] yobs;
+  vector[Ncen] ycen;
+  matrix[Nobs, M_bg] Xobs_bg;
+  matrix[Ncen, M_bg] Xcen_bg;
+}
+
+transformed data {
+  matrix[Nobs, M_bg] Xobs_bg_early = Xobs_bg;
+  matrix[Nobs, M_bg] Xobs_bg_late = Xobs_bg;
+  matrix[Ncen, M_bg] Xcen_bg_early = Xcen_bg;
+  matrix[Ncen, M_bg] Xcen_bg_late = Xcen_bg;
+
+  for (i in 1:Nobs) {
+    Xobs_bg_early[i,1] = 0;
+    Xobs_bg_late[i,1] = 1;
+  }
+  for (i in 1:Ncen) {
+    Xcen_bg_early[i,1] = 0;
+    Xcen_bg_late[i,1] = 1;
+  }
+
+}
+
+
+parameters {
+  real<lower=0> tau_s_bg_raw;
+  vector<lower=0>[M_bg] tau_bg_raw;
+
+  real alpha_raw;
+  vector[M_bg] beta_bg_raw;
+
+  real mu;
+
+  real<lower=0> shape;
+  real<lower=0> scale;
+  real<lower=0> shape_exp;
+  real<lower=0> scale_exp;
+}
+
+transformed parameters {
+  vector[M_bg] beta_bg;
+  real alpha;
+
+  beta_bg = bg_prior_lp(tau_s_bg_raw, tau_bg_raw) .* beta_bg_raw;
+  alpha = exp(10 * alpha_raw);
+}
+
+model {
+  ybef ~ weibull(shape, scale);
+  ybef_exp ~ weibull(shape_exp, scale_exp);
+  yobs ~ weibull(alpha, exp(-(mu + Xobs_bg * beta_bg)/alpha));
+  target += weibull_lccdf(ycen | alpha, exp(-(mu + Xcen_bg * beta_bg)/alpha));
+
+  beta_bg_raw ~ normal(0.0, 1.0);
+  alpha_raw ~ normal(0.0, 1.0);
+  mu ~ normal(0.0, 10);
+  shape ~ normal(0.0,5.0);
+  scale ~ normal(300.0,300.0);
+  shape_exp ~ normal(0.0,5.0);
+  scale_exp ~ normal(300.0,300.0);
+}
+
+generated quantities {
+  real yhat_uncens[Nobs + Ncen];
+  real yhat_exp_uncens[Nobs + Ncen];
+  real yhat_total[Nobs + Ncen];
+  real yhat_exp_total[Nobs + Ncen];
+  real ytmp[Nobs + Ncen];
+  real y_exptmp[Nobs + Ncen];
+  real yhat_early[Nobs + Ncen];
+  real yhat_late[Nobs + Ncen];
+  for (i in 1:Nobs) {
+    ytmp[i] = weibull_rng(shape, scale);
+    y_exptmp[i] = weibull_rng(shape_exp, scale_exp);
+    yhat_early[i] = weibull_rng(alpha, exp(-(mu + Xobs_bg_early[i,] * beta_bg)/alpha));
+    yhat_late[i] = weibull_rng(alpha, exp(-(mu + Xobs_bg_late[i,] * beta_bg)/alpha));
+    if (ytmp[i] <= Median)
+      yhat_uncens[i] = yhat_early[i];
+    else
+      yhat_uncens[i] = yhat_late[i];
+    if (y_exptmp[i] <= Median)
+      yhat_exp_uncens[i] = yhat_early[i];
+    else
+      yhat_exp_uncens[i] = yhat_late[i];
+    yhat_total[i] = yhat_uncens[i] + ytmp[i];
+    yhat_exp_total[i] = yhat_exp_uncens[i] + y_exptmp[i];
+  }
+  for (i in 1:Ncen) {
+    ytmp[Nobs + i] = weibull_rng(shape, scale);
+    y_exptmp[Nobs + i] = weibull_rng(shape_exp, scale_exp);
+    yhat_early[Nobs + i] = weibull_rng(alpha, exp(-(mu + Xcen_bg_early[i,] * beta_bg)/alpha));
+    yhat_late[Nobs + i] = weibull_rng(alpha, exp(-(mu + Xcen_bg_late[i,] * beta_bg)/alpha));
+    if (ytmp[Nobs + i] <= Median)
+      yhat_uncens[Nobs + i] = yhat_early[Nobs + i];
+    else
+      yhat_uncens[Nobs + i] = yhat_late[Nobs + i];
+    if (y_exptmp[Nobs + i] <= Median)
+      yhat_exp_uncens[Nobs + i] = yhat_early[Nobs + i];
+    else
+      yhat_exp_uncens[Nobs + i] = yhat_late[Nobs + i];
+    yhat_total[Nobs + i] = yhat_uncens[Nobs + i] + ytmp[Nobs + i];
+    yhat_exp_total[Nobs + i] = yhat_exp_uncens[Nobs + i] + y_exptmp[Nobs + i];
+  }
+}
+```
+
+この手法は各がん種の生存期間の推定を可能にするだけではなく、生存期間に影響を与える因子の影響も推定することを可能にします。ある遺伝子のがん化変異の有無での生存期間の違い、治療内容による生存期間の違いを算出することで、新たな治療ターゲットの発見や適切な治療方法の開発が可能になる可能性があります。
 
 
