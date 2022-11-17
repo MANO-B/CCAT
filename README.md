@@ -9,7 +9,8 @@ C-CATのユーザーは基本的に日本人と思われますので、説明は
 ![Figure_1, explanation for left-truncation](github_1.png)    
 
 また、化学療法の開始後の生存期間を考える場合、生存期間の開始日と観察開始日が異なることから、通常のKaplan-Meier estimatorでは正確な生存曲線を推定することが困難です。以下の様に、検査後早期の患者群は見かけ上良好な生存率を示しますが、経時的に生存曲線が左下にシフトしていき、徐々に真の曲線に近づいていきます。しかし、全ての患者が打ち切り無く死亡まで観察されない限りはバイアスがなくなることはありません（そしてそのようなことは現実的には不可能です）。    
-![Figure_2, explanation for survival curve shift](github_2.png)    
+![Figure_2, explanation for survival curve shift](github_2.png)  
+SPT: survival prolonging therapy    
 
 このバイアスの存在のため、現状ではC-CATのデータを用いた生存期間の解析は困難といえます。個人的には診断時のStageの記載が無いことも活用の幅を狭めている大きな要因と思いますが、3万症例を超えるビッグデータがあるにも関わらず、遺伝子変異プロファイルや免疫染色などの静的な情報のみしか活用できないというのはもったいないと感じました。  
 日本ではクリニカルシークエンスの情報がC-CATに集約されていますが、アメリカでは多数のhigh-volume cancer centerが協力しAACR Project GENIEのもとに情報を集約し公開しています。  
@@ -30,8 +31,7 @@ C-CATのデータの場合、どのイベントを生存期間解析の評価開
 
 この左側切断による選択バイアスについては統計学者の間でも補正手法の開発が行われており、とくに日本からは[江村剛志](https://sites.google.com/view/takeshi-emura)先生が第一人者として知られています。左側切断による選択バイアスの補正手法はいくつかのR言語用のパッケージとして公開されています。  
 [tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
-[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
-[tranSurv: structural transformation methodでの補正手法](https://github.com/stc04003/tranSurv)  
+[depend.truncation: copula-graphic estimatorでの補正手法](https://cran.r-project.org/web/packages/depend.truncation/index.html)    
 
 
 
