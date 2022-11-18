@@ -1,7 +1,7 @@
 # Files for analysis of C-CAT survival data.  
 Supplementary code for the paper: Tamura T, et. al., Selection Bias Due to Delayed Comprehensive Genomic Profiling in Japan. Cancer Sci. 2022 Nov 12.  doi: 10.1111/cas.15651. Online ahead of print.  
 [link for the paper](https://onlinelibrary.wiley.com/doi/10.1111/cas.15651)  
-This explanation text was written in Japanese.  
+This explanation text was written in Japanese. Please use [DeepL translator](https://www.deepl.com/translator).  
 C-CATのユーザーは基本的に日本人と思われますので、説明は日本語で記載します。  
 
 # C-CATのデータにおける左側切断と右側打ち切りによる生存期間解析への影響
