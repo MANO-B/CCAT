@@ -201,5 +201,7 @@ ER陽性乳がん患者における比較的稀ながん化変異であるAKT1 E
 膵がんにおける1st line化学療法は現在はGEM + nab-PTXが主流になっている様ですが、FOLFIRINOXと効果としては差は無さそうでした。  
 ![Figure_11, effect of chemotherapy regimens in pancreatic cancer patients](github_11.png)    
   
+今後のC-CATへの症例数の蓄積、観察期間の増加と打ち切りの減少によって解析の正確性が高まっていくはずです。ビッグデータの利点を活かして、比較的稀な組織型や変異の生存期間や薬剤奏効性への影響、複数の治療内容の比較といった解析が進んでいくことが望まれます。  
+
 
 
