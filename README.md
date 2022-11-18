@@ -44,11 +44,13 @@ C-CATのデータの場合、どのイベントを生存期間解析の評価開
 
 その上で、二つの生存曲線をWeibull分布で近似し、この生存曲線から得られる生存期間を足し合わせることで全生存期間を推定できるのではないかと考えました。これにより、各がん種での生存期間を実際の臨床に近い値で推定することができました。  
 ![Figure_7, survival adjusted with Bayes inference](github_7.png)    
+![Figure_8, effect of bias adjustment](github_8.png)    
 
 Stan言語を用いたBayes推定によってシミュレーションを行っています。この領域ではKazuki Yoshida先生がわかりやすい解説記事を作成して下さっております。ここで紹介されているStanのコードを改変し、上述の解析を可能にしました。  
 [Bayesian Survival Analysis 1: Weibull Model with Stan](https://rstudio-pubs-static.s3.amazonaws.com/435225_07b4ab5afa824342a4680c9fb2de6098.html)    
 
-```R
+以下のStanコードが解析内容の中心ですが、C-CATのデータは病名の登録等が手入力で行われているためにデータの前処理が相当に必要です。前処理も含めて一括して解析、レポート作成できるようにRmdファイルを作成しています。  
+```Stan
 functions {
   vector sqrt_vec(vector x) {
     vector[dims(x)[1]] res;
